@@ -1,0 +1,87 @@
+# -----------------------------
+# Python
+# -----------------------------
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.py.class
+*.egg
+*.egg-info/
+*.manifest
+*.spec
+
+# -----------------------------
+# Virtual Environment
+# -----------------------------
+venv/
+env/
+ENV/
+.env/
+.envrc
+
+# -----------------------------
+# FastAPI / Uvicorn
+# -----------------------------
+*.log
+logs/
+uvicorn.log
+
+# -----------------------------
+# IDE Specific
+# -----------------------------
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# -----------------------------
+# OS Files
+# -----------------------------
+.DS_Store
+Thumbs.db
+
+# -----------------------------
+# Byte-compiled / cache
+# -----------------------------
+.cache/
+pytest_cache/
+pip-wheel-metadata/
+
+# -----------------------------
+# Distribution / Build
+# -----------------------------
+build/
+dist/
+wheels/
+
+# -----------------------------
+# Local configs (keep safe)
+# -----------------------------
+config.json
+settings.json
+
+# -----------------------------
+# Environment Files
+# -----------------------------
+.env
+*.env
+
+# -----------------------------
+# MySQL / Docker (optional)
+# -----------------------------
+*.sql
+docker-data/
+mysql-data/
+
+# -----------------------------
+# PyCharm
+# -----------------------------
+.idea/
+*.iml
+
+# -----------------------------
+# Other
+# -----------------------------
+.coverage
+htmlcov/
