@@ -10,14 +10,27 @@ from app.seed.init_data import seed_initial_data
 
 app = FastAPI(title="Simple AW Admin API")
 
+# ------------------------------
+# CORS Configuration
+# ------------------------------
+origins = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://54.147.145.228",
+    "https://54.147.145.228",
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+# ------------------------------
+# Startup
+# ------------------------------
 @app.on_event("startup")
 def on_startup():
     Base.metadata.create_all(bind=engine)
@@ -27,7 +40,9 @@ def on_startup():
     finally:
         db.close()
 
-# include routers
+# ------------------------------
+# Routes
+# ------------------------------
 app.include_router(auth_router)
 app.include_router(roles_router)
 app.include_router(users_router)
