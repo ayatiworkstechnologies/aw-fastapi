@@ -1,19 +1,27 @@
-Project overview
+# AW FastAPI – Admin Backend
 
-Small FastAPI backend for AW Admin (users, roles, blogs, authors, categories).
-Features:
+A small, clean **FastAPI backend** powering the AW Admin panel.  
+Manages **users, roles, blogs, authors, and categories** with JWT-based authentication.
 
-SQLAlchemy models + DB seeding
+---
 
-JWT auth
+## ✨ Features
 
-Blog/Author/Category CRUD
+- FastAPI + SQLAlchemy
+- MySQL support (via PyMySQL)
+- JWT authentication
+- User & role management
+- Blog / Author / Category CRUD
+- Blog sections stored as JSON
+- Database seeding on startup
+- Environment-based configuration (`.env`)
+- Swagger & ReDoc auto-generated APIs
 
-Sections stored as JSON per blog
+---
 
-Uses a .env style DATABASE_URL and other config
+## 📁 Project Structure
 
-Quick folder structure (recommended single-file view)
+```text
 aw-fastapi/
 ├─ app/
 │  ├─ api/
@@ -47,19 +55,25 @@ aw-fastapi/
 ├─ requirements.txt
 ├─ .env.example
 ├─ install.md
-├─ README.md   <-- (this file)
-└─ venv/
+├─ README.md
+└─ venv/            # excluded from git
 
 
-Adjust names/paths if your project differs. The venv/ folder should be excluded from git.
+## ⚙️ Environment Variables
 
-.env example (create .env in project root)
-# .env.example -> copy to .env and edit
+Create a .env file in the project root.
+
+``` bash
 DATABASE_URL=mysql+pymysql://awadmin:ayati123@localhost:3306/aw_admin?charset=utf8mb4
 SECRET_KEY=replace-with-a-long-random-secret
 ACCESS_TOKEN_EXPIRE_HOURS=12
+```
+
+## 📦 Requirements
 
 requirements.txt (minimum)
+
+```bash 
 fastapi
 uvicorn
 python-dotenv
@@ -73,181 +87,88 @@ markdown
 bleach
 cryptography
 
+```
 
-Install with pip install -r requirements.txt.
+## Install dependencies
 
-Local development: step-by-step
-1. Clone & cd
+```bash
+pip install -r requirements.txt
+```
+
+## 🚀 Local Development Setup
+
+## 1. Clone the repository
+
+```bash
 git clone <repo-url>
 cd aw-fastapi
+```
 
-2. Create virtualenv & activate
-macOS / Linux
+## 2. Create & activate virtual environment
+
+```bash
+##macOS / Linux
+
 python3 -m venv venv
 source venv/bin/activate
 
-Windows (PowerShell)
+```
+
+```bash
+
+##Windows (PowerShell)
+
 python -m venv venv
 venv\Scripts\Activate.ps1
-# or: venv\Scripts\activate
+```
 
-3. Install dependencies
+## 3. Install dependencies
+
+```bash
 pip install --upgrade pip
 pip install -r requirements.txt
+```
 
-4. Create .env from example
+## 4. Create .env
+
+```bash
 cp .env.example .env
-# edit .env and set real DB password + SECRET_KEY
+```
 
-5. Create MySQL database (local or remote)
+Edit values as needed.
 
-Use MySQL client or phpMyAdmin:
+## 5. Create MySQL Database
 
+```bash
 CREATE DATABASE aw_admin CHARACTER SET utf8mb4;
 CREATE USER 'awadmin'@'localhost' IDENTIFIED BY 'ayati123';
 GRANT ALL PRIVILEGES ON aw_admin.* TO 'awadmin'@'localhost';
 FLUSH PRIVILEGES;
+```
 
-6. Run the app (dev)
-# ensure venv is active
+## 6. Run the application
+
+```bash
 uvicorn app.main:app --reload
+```
 
+## Access API documentation
 
-Open docs:
+```bash
+Swagger UI → http://127.0.0.1:8000/docs
 
-Swagger UI: http://127.0.0.1:8000/docs
+ReDoc → http://127.0.0.1:8000/redoc
+```
 
-ReDoc: http://127.0.0.1:8000/redoc
+On startup, the app auto-creates tables and seeds initial data if seed/init_data.py exists.
 
-The app will run startup tasks that create tables and seed initial data (roles, admin user, sample blog/author/category) if seed/init_data.py is present.
+## 🌍 Using a Remote Database (Recommended)
 
-Running against a live (remote) DB
+SSH Tunnel (Secure)
+ssh -i key.pem -L 3307:localhost:3306 ubuntu@EC2_IP
 
-Recommended (secure): SSH Tunnel
-
-From your local machine:
-
-ssh -i path/to/key.pem -L 3307:localhost:3306 ubuntu@EC2_IP
-
-
-Then use in local .env:
+Update .env:
 
 DATABASE_URL=mysql+pymysql://awadmin:ayati123@localhost:3307/aw_admin?charset=utf8mb4
 
-
-Not recommended: open port 3306 to the world. If you must, restrict security group to your IP only.
-
-Production deployment (basic)
-Option A — systemd + uvicorn + Apache (reverse proxy)
-
-Create systemd service file /etc/systemd/system/fastapi.service:
-
-[Unit]
-Description=FastAPI app
-After=network.target
-
-[Service]
-User=ubuntu
-Group=www-data
-WorkingDirectory=/var/www/aw-fastapi
-ExecStart=/var/www/aw-fastapi/venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8000
-Restart=always
-
-[Install]
-WantedBy=multi-user.target
-
-
-sudo systemctl daemon-reload && sudo systemctl enable fastapi && sudo systemctl start fastapi
-
-Configure Apache (or Nginx) reverse proxy to http://127.0.0.1:8000/. Example Apache vhost:
-
-<VirtualHost *:80>
-    ServerName your-domain.com
-    ProxyPreserveHost On
-    ProxyPass / http://127.0.0.1:8000/
-    ProxyPassReverse / http://127.0.0.1:8000/
-</VirtualHost>
-
-Option B — use Docker (recommended for portability)
-
-I can give a Dockerfile + docker-compose.yml if you want.
-
-DB migrations
-
-This project uses SQLAlchemy Base.metadata.create_all() by default for dev. For production, use Alembic:
-
-pip install alembic
-alembic init alembic
-# configure env.py to use your SQLALCHEMY DATABASE_URL, generate migrations, apply
-
-Seed data
-
-If present, app/seed/init_data.py runs on startup and seeds:
-
-roles (admin, employee, hr, manager)
-
-super admin user (username & emp_id created)
-
-sample authors, categories, and a sample blog
-
-If you change models, re-run DB or run migration.
-
-Using the API (endpoints summary)
-
-Auth:
-
-POST /api/auth/login (email + password) → JWT token
-
-Users:
-
-GET /api/users
-
-POST /api/users
-
-GET /api/users/{id}
-
-PUT /api/users/{id}
-
-Roles:
-
-GET /api/roles
-
-POST /api/roles
-
-Blogs:
-
-GET /api/blogs (filters: ?skip=0&limit=10&category=slug&author=slug&q=text)
-
-GET /api/blogs/{slug}
-
-POST /api/blogs (admin only recommended)
-
-PUT /api/blogs/{slug}
-
-DELETE /api/blogs/{slug}
-
-Authors:
-
-GET /api/authors, POST /api/authors, PUT /api/authors/{id}, DELETE /api/authors/{id}
-
-Categories:
-
-GET /api/categories, POST /api/categories, PUT /api/categories/{id}, DELETE /api/categories/{id}
-
-Use Swagger at /docs for full spec and example bodies.
-
-Example create-blog JSON
-{
-  "title": "Why Chennai Brands Grow Faster",
-  "slug": "why-chennai-brands-grow-faster",
-  "deck": "Five reasons local agencies outperform",
-  "banner_img": "https://.../banner.jpg",
-  "banner_title": "Why Chennai Brands Grow Faster",
-  "author_id": 1,
-  "category_id": 1,
-  "read_mins": 8,
-  "sections": [
-    { "title": "Intro", "text": "Intro text", "order": 1 },
-    { "title": "Reason 1", "text": "Details...", "img": "https://.../img1.jpg", "order": 2 }
-  ]
-}
+Avoid opening port 3306 publicly
