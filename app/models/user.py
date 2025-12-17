@@ -12,13 +12,17 @@ class User(Base):
     full_name = Column(String(120), nullable=False)
     email = Column(String(120), unique=True, index=True, nullable=False)
     password_hash = Column(String(255), nullable=False)
-    dept = Column(String(120), nullable=True)
     is_active = Column(Boolean, default=True)
 
+    # 🔐 Role
     role_id = Column(Integer, ForeignKey("roles.id"), nullable=False)
     role = relationship("Role", back_populates="users")
 
-    # password helpers
+    # 🏢 Department (FIX)
+    department_id = Column(Integer, ForeignKey("departments.id"), nullable=True)
+    department = relationship("Department", back_populates="users")
+
+    # 🔑 password helpers
     def set_password(self, password: str):
         self.password_hash = pwd_context.hash(password)
 

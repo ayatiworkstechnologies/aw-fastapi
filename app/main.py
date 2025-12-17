@@ -9,6 +9,8 @@ from app.api.routes_users import router as users_router
 from app.api.routes_blogs import router as blogs_router
 from app.api.routes_authors import router as authors_router
 from app.api.routes_categories import router as categories_router
+from app.api.routes_department import router as department_router
+
 from app.seed.init_data import seed_initial_data
 
 app = FastAPI(title="Simple AW Admin API")
@@ -53,3 +55,5 @@ app.include_router(users_router)
 app.include_router(blogs_router)
 app.include_router(authors_router)
 app.include_router(categories_router)
+app.include_router(department_router)
+

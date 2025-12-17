@@ -1,44 +1,75 @@
 from sqlalchemy.orm import Session
 from app.models.role import Role
 from app.models.user import User
+from app.models.department import Department
 
 
 def generate_employee_id(db: Session) -> str:
-    """
-    Generate a new employee ID like AW001, AW002, ...
-    Uses last user's id to compute next number.
-    """
     last_user = db.query(User).order_by(User.id.desc()).first()
     next_number = (last_user.id if last_user else 0) + 1
     return f"AW{str(next_number).zfill(3)}"
 
 
 def seed_initial_data(db: Session):
-    # Seed roles if empty
+
+    # ==========================
+    # SEED ROLES
+    # ==========================
     if db.query(Role).count() == 0:
-        default_roles = [
+        roles = [
             ("admin", "Full access"),
-            ("employee", "Standard employee"),
-            ("hr", "HR staff"),
             ("manager", "Team manager"),
+            ("hr", "HR staff"),
+            ("employee", "Standard employee"),
         ]
-        for name, desc in default_roles:
+        for name, desc in roles:
             db.add(Role(name=name, description=desc))
         db.commit()
 
-    # Seed one Super Admin if no users
-    if db.query(User).count() == 0:
-        admin_role = db.query(Role).filter(Role.name == "admin").first()
-        if admin_role:
-            admin = User(
-                emp_id=generate_employee_id(db),  # e.g. AW001
-                username="admin",                 # NEW required field
-                full_name="Super Admin",
-                email="admin@example.com",
-                dept="Admin",                     # optional, can be None
-                is_active=True,
-                role=admin_role,
-            )
-            admin.set_password("admin123")        # default password
-            db.add(admin)
-            db.commit()
+    admin_role = db.query(Role).filter(Role.name == "admin").first()
+
+    # ==========================
+    # SEED DEPARTMENTS
+    # ==========================
+    if db.query(Department).count() == 0:
+        departments = [
+            "Admin",
+            "Manager",
+            "HR",
+            "Web Development",
+            "Graphic Design",
+            "UI / UX",
+            "Video",
+            "Intern",
+            "Content Writing",
+            "SEO & Social Media",
+        ]
+
+        for dept in departments:
+            db.add(Department(name=dept, is_active=True))
+
+        db.commit()
+
+    # Get Admin department safely
+    admin_department = (
+        db.query(Department)
+        .filter(Department.name == "Admin")
+        .first()
+    )
+
+    # ==========================
+    # SEED SUPER ADMIN USER
+    # ==========================
+    if db.query(User).count() == 0 and admin_role and admin_department:
+        admin = User(
+            emp_id=generate_employee_id(db),
+            username="admin",
+            full_name="Super Admin",
+            email="admin@ayatiworks.com",
+            role=admin_role,
+            department=admin_department,  # ✅ SAFE FK
+            is_active=True,
+        )
+        admin.set_password("admin123")
+        db.add(admin)
+        db.commit()
